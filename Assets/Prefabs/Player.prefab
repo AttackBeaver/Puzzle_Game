@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 821018358241683000}
   - component: {fileID: 1357889805701975174}
   - component: {fileID: 7108399783595422366}
+  - component: {fileID: 8390681803064628531}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -122,9 +123,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 970098444b688b243a8b2fc66591e233, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  idleUp: {fileID: 478409698, guid: 77973d953ad4ca7419a6b46cbea9ddab, type: 3}
-  idleDown: {fileID: -1865965503, guid: 77973d953ad4ca7419a6b46cbea9ddab, type: 3}
-  idleHorizontal: {fileID: 1072162132, guid: 77973d953ad4ca7419a6b46cbea9ddab, type: 3}
   runUp:
   - {fileID: 478409698, guid: 77973d953ad4ca7419a6b46cbea9ddab, type: 3}
   - {fileID: -1590986845, guid: 77973d953ad4ca7419a6b46cbea9ddab, type: 3}
@@ -146,6 +144,27 @@ MonoBehaviour:
   - {fileID: 1542530702, guid: 77973d953ad4ca7419a6b46cbea9ddab, type: 3}
   - {fileID: -798504813, guid: 77973d953ad4ca7419a6b46cbea9ddab, type: 3}
   - {fileID: 915133523, guid: 77973d953ad4ca7419a6b46cbea9ddab, type: 3}
+  idleUp:
+  - {fileID: 1357608950, guid: 77973d953ad4ca7419a6b46cbea9ddab, type: 3}
+  - {fileID: 1525845113, guid: 77973d953ad4ca7419a6b46cbea9ddab, type: 3}
+  - {fileID: -1075711928, guid: 77973d953ad4ca7419a6b46cbea9ddab, type: 3}
+  - {fileID: -887771951, guid: 77973d953ad4ca7419a6b46cbea9ddab, type: 3}
+  - {fileID: -1596787852, guid: 77973d953ad4ca7419a6b46cbea9ddab, type: 3}
+  - {fileID: -1970375368, guid: 77973d953ad4ca7419a6b46cbea9ddab, type: 3}
+  idleDown:
+  - {fileID: 1357608950, guid: 77973d953ad4ca7419a6b46cbea9ddab, type: 3}
+  - {fileID: 1525845113, guid: 77973d953ad4ca7419a6b46cbea9ddab, type: 3}
+  - {fileID: -1075711928, guid: 77973d953ad4ca7419a6b46cbea9ddab, type: 3}
+  - {fileID: -887771951, guid: 77973d953ad4ca7419a6b46cbea9ddab, type: 3}
+  - {fileID: -1596787852, guid: 77973d953ad4ca7419a6b46cbea9ddab, type: 3}
+  - {fileID: -1970375368, guid: 77973d953ad4ca7419a6b46cbea9ddab, type: 3}
+  idleHorizontal:
+  - {fileID: 1357608950, guid: 77973d953ad4ca7419a6b46cbea9ddab, type: 3}
+  - {fileID: 1525845113, guid: 77973d953ad4ca7419a6b46cbea9ddab, type: 3}
+  - {fileID: -1075711928, guid: 77973d953ad4ca7419a6b46cbea9ddab, type: 3}
+  - {fileID: -887771951, guid: 77973d953ad4ca7419a6b46cbea9ddab, type: 3}
+  - {fileID: -1596787852, guid: 77973d953ad4ca7419a6b46cbea9ddab, type: 3}
+  - {fileID: -1970375368, guid: 77973d953ad4ca7419a6b46cbea9ddab, type: 3}
   initialIdleAnimation:
   - {fileID: 1357608950, guid: 77973d953ad4ca7419a6b46cbea9ddab, type: 3}
   - {fileID: 1525845113, guid: 77973d953ad4ca7419a6b46cbea9ddab, type: 3}
@@ -173,8 +192,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 1, y: 1, z: 1}
-  m_Center: {x: 0, y: 0, z: 0}
+  m_Size: {x: 0.86256665, y: 1.20026, z: 1}
+  m_Center: {x: -0.02945003, y: 0.10013002, z: 0}
 --- !u!54 &7108399783595422366
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -202,3 +221,23 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 112
   m_CollisionDetection: 0
+--- !u!114 &8390681803064628531
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4884375631883119277}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1aaec00781ea3e24086e3eedacc9ad56, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  deathSprites:
+  - {fileID: -1866593535, guid: 77973d953ad4ca7419a6b46cbea9ddab, type: 3}
+  - {fileID: -691901296, guid: 77973d953ad4ca7419a6b46cbea9ddab, type: 3}
+  - {fileID: 1424080100, guid: 77973d953ad4ca7419a6b46cbea9ddab, type: 3}
+  - {fileID: 353540068, guid: 77973d953ad4ca7419a6b46cbea9ddab, type: 3}
+  deathSound: {fileID: 8300000, guid: d7d43178cfa78df4196c53c0d0fdcb32, type: 3}
+  frameDuration: 0.5
+  deathAnimationTrigger: Death

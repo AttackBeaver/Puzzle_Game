@@ -3,23 +3,23 @@ using UnityEngine;
 
 /// <summary>
 /// Контроллер анимации для главного персонажа.
-/// Поддерживает беговую анимацию для движения вверх, вниз и горизонтально (один массив для влево/вправо, с зеркалированием),
-/// а также анимацию покоя. Если персонаж ещё не двигался, проигрывается начальная анимация покоя.
+/// Поддерживает беговую анимацию и анимацию покоя, при этом для горизонтальных движений используется один массив с зеркалированием.
+/// Также реализована начальная idle-анимация, которая проигрывается до первого движения.
 /// </summary>
 public class PlayerAnimationController : MonoBehaviour
 {
-    [Header("Idle Sprites")]
-    [SerializeField] private Sprite idleUp;          // Спрайт покоя для движения вверх
-    [SerializeField] private Sprite idleDown;        // Спрайт покоя для движения вниз
-    [SerializeField] private Sprite idleHorizontal;  // Спрайт покоя для движения влево/вправо
-
     [Header("Run Animations")]
     [SerializeField] private Sprite[] runUp;         // Кадры беговой анимации для движения вверх
     [SerializeField] private Sprite[] runDown;       // Кадры беговой анимации для движения вниз
-    [SerializeField] private Sprite[] runHorizontal; // Один массив кадров для движения влево/вправо
+    [SerializeField] private Sprite[] runHorizontal; // Один массив для движения влево/вправо (будет зеркалироваться)
+
+    [Header("Idle Animations (After Movement)")]
+    [SerializeField] private Sprite[] idleUp;         // Idle анимация, когда персонаж уже двигался и стоит, смотрящий вверх
+    [SerializeField] private Sprite[] idleDown;       // Idle анимация, когда персонаж уже двигался и стоит, смотрящий вниз
+    [SerializeField] private Sprite[] idleHorizontal; // Idle анимация для горизонтального состояния (после движения)
 
     [Header("Initial Idle Animation (Before Movement)")]
-    [SerializeField] private Sprite[] initialIdleAnimation; // Анимация покоя до первого движения
+    [SerializeField] private Sprite[] initialIdleAnimation; // Idle анимация до первого движения
 
     [Header("Animation Settings")]
     [SerializeField] private float frameRate = 0.1f; // Время одного кадра анимации
@@ -29,13 +29,12 @@ public class PlayerAnimationController : MonoBehaviour
 
     private float timer;
     private int frameIndex;
-    private Vector3 lastMoveDirection = Vector3.forward; // Начальное направление (можно изменить)
+    private Vector3 lastMoveDirection = Vector3.forward; // Начальное направление (можно задать любое)
     private bool isMoving;
-    private bool hasMoved = false; // Флаг: был ли игрок хоть раз в движении
+    private bool hasMoved = false; // Флаг, указывающий, двигался ли персонаж хоть раз
 
     private void Awake()
     {
-        // Получаем необходимые компоненты
         spriteRenderer = GetComponent<SpriteRenderer>();
         rb = GetComponent<Rigidbody>();
     }
@@ -43,11 +42,11 @@ public class PlayerAnimationController : MonoBehaviour
     [System.Obsolete]
     private void Update()
     {
-        // Определяем, движется ли персонаж
+        // Получаем скорость и определяем, движется ли персонаж
         Vector3 velocity = rb.velocity;
         isMoving = velocity.magnitude > 0.1f;
 
-        // Если движется, обновляем направление и помечаем, что персонаж уже двигался
+        // Если персонаж движется, обновляем направление и помечаем, что он двигался
         if (isMoving)
         {
             hasMoved = true;
@@ -60,9 +59,10 @@ public class PlayerAnimationController : MonoBehaviour
     }
 
     /// <summary>
-    /// Обновляет анимацию в зависимости от состояния персонажа.
-    /// Если движется – проигрывается беговая анимация, иначе – спрайт покоя.
-    /// Если персонаж ещё не двигался, проигрывается специальная анимация покоя.
+    /// Обновляет анимацию персонажа в зависимости от его состояния:
+    /// - Если персонаж движется, проигрывается беговая анимация.
+    /// - Если персонаж стоит и еще не двигался, проигрывается начальная idle-анимация.
+    /// - Если персонаж стоит, но уже двигался, проигрывается стандартная idle-анимация.
     /// </summary>
     private void UpdateAnimation()
     {
@@ -79,9 +79,9 @@ public class PlayerAnimationController : MonoBehaviour
         }
         else
         {
+            // Если персонаж не двигался вообще, проигрываем начальную idle-анимацию
             if (!hasMoved && initialIdleAnimation != null && initialIdleAnimation.Length > 0)
             {
-                // Анимация покоя до первого движения
                 timer += Time.deltaTime;
                 if (timer >= frameRate)
                 {
@@ -92,24 +92,28 @@ public class PlayerAnimationController : MonoBehaviour
             }
             else
             {
-                // Статичный спрайт покоя после того, как персонаж уже двигался
-                spriteRenderer.sprite = GetIdleSprite(lastMoveDirection);
-                frameIndex = 0;
-                timer = 0f;
+                // Если персонаж уже двигался, проигрываем стандартную idle-анимацию, соответствующую последнему направлению
+                Sprite[] idleAnim = GetIdleAnimation(lastMoveDirection);
+                timer += Time.deltaTime;
+                if (timer >= frameRate)
+                {
+                    timer = 0f;
+                    frameIndex = (frameIndex + 1) % idleAnim.Length;
+                    spriteRenderer.sprite = idleAnim[frameIndex];
+                }
             }
         }
     }
 
     /// <summary>
-    /// Возвращает массив беговой анимации для заданного направления.
-    /// Если горизонтальное движение, используется массив runHorizontal,
-    /// и спрайт отзеркаливается в зависимости от направления по оси X.
+    /// Возвращает массив спрайтов беговой анимации в зависимости от направления движения.
+    /// Для горизонтального направления используется массив runHorizontal с зеркалированием.
     /// </summary>
     private Sprite[] GetRunAnimation(Vector3 direction)
     {
         if (Mathf.Abs(direction.x) > Mathf.Abs(direction.z))
         {
-            // Горизонтальное движение: используем runHorizontal и зеркалим спрайт
+            // Горизонтальное движение: зеркалим спрайт, если движение влево (x < 0)
             spriteRenderer.flipX = direction.x < 0;
             return runHorizontal;
         }
@@ -121,10 +125,10 @@ public class PlayerAnimationController : MonoBehaviour
     }
 
     /// <summary>
-    /// Возвращает спрайт покоя для заданного направления.
-    /// Если горизонтальное движение, используется idleHorizontal с зеркалированием.
+    /// Возвращает массив спрайтов idle-анимации в зависимости от направления движения.
+    /// Для горизонтального направления используется массив idleHorizontal с зеркалированием.
     /// </summary>
-    private Sprite GetIdleSprite(Vector3 direction)
+    private Sprite[] GetIdleAnimation(Vector3 direction)
     {
         if (Mathf.Abs(direction.x) > Mathf.Abs(direction.z))
         {

@@ -103,9 +103,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 970098444b688b243a8b2fc66591e233, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  idleUp: {fileID: -1257410867, guid: 18f6692548d6acc4ea14d514248e02db, type: 3}
-  idleDown: {fileID: 119898375, guid: 18f6692548d6acc4ea14d514248e02db, type: 3}
-  idleHorizontal: {fileID: 1520583430, guid: 18f6692548d6acc4ea14d514248e02db, type: 3}
   runUp:
   - {fileID: -1257410867, guid: 18f6692548d6acc4ea14d514248e02db, type: 3}
   - {fileID: 2138892559, guid: 18f6692548d6acc4ea14d514248e02db, type: 3}
@@ -127,6 +124,27 @@ MonoBehaviour:
   - {fileID: 1251969637, guid: 18f6692548d6acc4ea14d514248e02db, type: 3}
   - {fileID: 232594485, guid: 18f6692548d6acc4ea14d514248e02db, type: 3}
   - {fileID: 899663937, guid: 18f6692548d6acc4ea14d514248e02db, type: 3}
+  idleUp:
+  - {fileID: -260060019, guid: 18f6692548d6acc4ea14d514248e02db, type: 3}
+  - {fileID: -986427615, guid: 18f6692548d6acc4ea14d514248e02db, type: 3}
+  - {fileID: -1378572298, guid: 18f6692548d6acc4ea14d514248e02db, type: 3}
+  - {fileID: 1936706436, guid: 18f6692548d6acc4ea14d514248e02db, type: 3}
+  - {fileID: -1957270234, guid: 18f6692548d6acc4ea14d514248e02db, type: 3}
+  - {fileID: 129538905, guid: 18f6692548d6acc4ea14d514248e02db, type: 3}
+  idleDown:
+  - {fileID: -260060019, guid: 18f6692548d6acc4ea14d514248e02db, type: 3}
+  - {fileID: -986427615, guid: 18f6692548d6acc4ea14d514248e02db, type: 3}
+  - {fileID: -1378572298, guid: 18f6692548d6acc4ea14d514248e02db, type: 3}
+  - {fileID: 1936706436, guid: 18f6692548d6acc4ea14d514248e02db, type: 3}
+  - {fileID: -1957270234, guid: 18f6692548d6acc4ea14d514248e02db, type: 3}
+  - {fileID: 129538905, guid: 18f6692548d6acc4ea14d514248e02db, type: 3}
+  idleHorizontal:
+  - {fileID: -260060019, guid: 18f6692548d6acc4ea14d514248e02db, type: 3}
+  - {fileID: -986427615, guid: 18f6692548d6acc4ea14d514248e02db, type: 3}
+  - {fileID: -1378572298, guid: 18f6692548d6acc4ea14d514248e02db, type: 3}
+  - {fileID: 1936706436, guid: 18f6692548d6acc4ea14d514248e02db, type: 3}
+  - {fileID: -1957270234, guid: 18f6692548d6acc4ea14d514248e02db, type: 3}
+  - {fileID: 129538905, guid: 18f6692548d6acc4ea14d514248e02db, type: 3}
   initialIdleAnimation:
   - {fileID: -260060019, guid: 18f6692548d6acc4ea14d514248e02db, type: 3}
   - {fileID: -986427615, guid: 18f6692548d6acc4ea14d514248e02db, type: 3}
@@ -150,10 +168,10 @@ MonoBehaviour:
   keyOne: 100
   keyTwo: 97
   moveDirection: {x: 0.75, y: 0, z: 0}
-  swipeThreshold: 25
+  swipeThreshold: 20
   moveSpeed: 10
-  collisionDistance: 0.6
-  maxMoveDuration: 10
+  collisionDistance: 0.5
+  maxMoveDuration: 1
 --- !u!65 &5942636866936662319
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -173,8 +191,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 1, y: 1, z: 1}
-  m_Center: {x: 0, y: 0, z: 0}
+  m_Size: {x: 0.8319794, y: 1.2059606, z: 1}
+  m_Center: {x: 0.024390161, y: 0.102980316, z: 0}
 --- !u!54 &3993389856902211129
 Rigidbody:
   m_ObjectHideFlags: 0
