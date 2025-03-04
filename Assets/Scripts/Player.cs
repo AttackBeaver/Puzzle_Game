@@ -12,7 +12,7 @@ public class Player : MonoBehaviour
     [SerializeField] private KeyCode keyOne;
     [SerializeField] private KeyCode keyTwo;
     [SerializeField] private Vector3 moveDirection; // Например, (0,0,1)
-    
+
     [Header("Mobile Input")]
     [SerializeField] private float swipeThreshold = 50f;   // Порог для распознавания свайпа (в пикселях)
     [SerializeField] private float moveSpeed = 5f;           // Скорость движения
@@ -159,7 +159,14 @@ public class Player : MonoBehaviour
     {
         if (CompareTag("Player") && other.CompareTag("Finish"))
         {
-            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
+            // Вычисляем индекс следующей сцены
+            int nextLevel = SceneManager.GetActiveScene().buildIndex + 1;
+
+            // Сохраняем прогресс с номером следующего уровня
+            Progress_Saver.SaveProgress(nextLevel);
+
+            // Затем загружаем следующую сцену
+            SceneManager.LoadScene(nextLevel);
         }
     }
 }
