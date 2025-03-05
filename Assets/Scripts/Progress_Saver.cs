@@ -19,10 +19,17 @@ public class Progress_Saver : MonoBehaviour
 
     /// <summary>
     /// Загружает уровень, сохранённый в PlayerPrefs.
-    /// Если прогресс не найден, выводит предупреждение.
+    /// Если прогресс не найден, выводит предупреждение и загружает первый уровень (Level_1).
     /// </summary>
-    public static int LoadProgress()
+    public static void LoadProgress()
     {
-        return PlayerPrefs.HasKey(SavedLevelKey) ? PlayerPrefs.GetInt(SavedLevelKey) : 0;
+        int levelIndex = PlayerPrefs.HasKey(SavedLevelKey) ? PlayerPrefs.GetInt(SavedLevelKey) : 1;
+        if (!PlayerPrefs.HasKey(SavedLevelKey))
+        {
+            Debug.LogWarning("Progress not found, loading first level (Level_1).");
+        }
+        string sceneName = "Level_" + levelIndex;
+        Debug.Log("Loading scene: " + sceneName);
+        SceneManager.LoadScene(sceneName);
     }
 }

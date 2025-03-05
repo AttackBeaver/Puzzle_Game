@@ -233,11 +233,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1aaec00781ea3e24086e3eedacc9ad56, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  deathSprites:
-  - {fileID: -1866593535, guid: 77973d953ad4ca7419a6b46cbea9ddab, type: 3}
-  - {fileID: -691901296, guid: 77973d953ad4ca7419a6b46cbea9ddab, type: 3}
-  - {fileID: 1424080100, guid: 77973d953ad4ca7419a6b46cbea9ddab, type: 3}
-  - {fileID: 353540068, guid: 77973d953ad4ca7419a6b46cbea9ddab, type: 3}
+  deathSprites: []
   deathSound: {fileID: 8300000, guid: d7d43178cfa78df4196c53c0d0fdcb32, type: 3}
   frameDuration: 0.5
   deathAnimationTrigger: Death
