@@ -3,8 +3,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 
 /// <summary>
-/// Основной скрипт управления для игрока (кубика).
-/// Позволяет управлять игрой и игроком (кубиком).
+/// Основной скрипт управления для игрока.
 /// </summary>
 public class Player : MonoBehaviour
 {
@@ -110,11 +109,6 @@ public class Player : MonoBehaviour
 
     /// <summary>
     /// Определяет направление свайпа для вида сверху.
-    /// Для примера:
-    /// - Вверх -> Vector3.forward,
-    /// - Вниз -> Vector3.back,
-    /// - Вправо -> Vector3.right,
-    /// - Влево -> Vector3.left.
     /// </summary>
     private Vector3 DetermineSwipeDirection(Vector2 delta)
     {
@@ -129,7 +123,7 @@ public class Player : MonoBehaviour
     }
 
     /// <summary>
-    /// Корутина для мобильного (или симулированного) движения.
+    /// Корутина для мобильного движения.
     /// Объект движется в указанном направлении до столкновения с препятствием или истечения maxMoveDuration.
     /// </summary>
     [System.Obsolete]
@@ -155,18 +149,46 @@ public class Player : MonoBehaviour
         isMobileMoving = false;
     }
 
+    /// <summary>
+    /// Метод срабатывания перехода на новый уровень,
+    /// при пересечении тега "Finish".
+    /// </summary>
     private void OnTriggerEnter(Collider other)
     {
+        // Проверяем, что коллайдер принадлежит игроку и столкновение произошло с объектом с тегом "Finish"
         if (CompareTag("Player") && other.CompareTag("Finish"))
         {
-            // Вычисляем индекс следующей сцены
-            int nextLevel = SceneManager.GetActiveScene().buildIndex + 1;
+            // Получаем имя текущей сцены
+            string currentSceneName = SceneManager.GetActiveScene().name;
+            // Извлекаем номер текущего уровня из имени сцены
+            int currentLevelNumber = ExtractLevelNumber(currentSceneName);
+            // Вычисляем номер следующего уровня
+            int nextLevelNumber = currentLevelNumber + 1;
 
             // Сохраняем прогресс с номером следующего уровня
-            Progress_Saver.SaveProgress(nextLevel);
+            Progress_Saver.SaveProgress(nextLevelNumber);
 
-            // Затем загружаем следующую сцену
-            SceneManager.LoadScene(nextLevel);
+            // Формируем имя следующей сцены по схеме "Level_{номер}"
+            string nextSceneName = "Level_" + nextLevelNumber;
+            // Загружаем следующую сцену по имени
+            SceneManager.LoadScene(nextSceneName);
         }
+    }
+
+    /// <summary>
+    /// Извлекает номер уровня из имени сцены, которая должна иметь формат "Level_X", где X – число.
+    /// Если парсинг не удался, возвращает 1.
+    /// </summary>
+    /// <param name="sceneName">Имя сцены</param>
+    /// <returns>Номер уровня</returns>
+    private int ExtractLevelNumber(string sceneName)
+    {
+        // Разбиваем имя сцены по символу '_'
+        string[] parts = sceneName.Split('_');
+        if (parts.Length > 1 && int.TryParse(parts[1], out int levelNum))
+        {
+            return levelNum;
+        }
+        return 1; // Если формат не соответствует, возвращаем 1
     }
 }

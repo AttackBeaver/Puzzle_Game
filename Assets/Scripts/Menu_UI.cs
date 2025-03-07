@@ -49,7 +49,6 @@ public class Menu_UI : MonoBehaviour
 
     /// <summary>
     /// Переходит в сцену Main_Menu.
-    /// Убедитесь, что сцена "Main_Menu" добавлена в Build Settings.
     /// </summary>
     public void GoToMainMenu()
     {
@@ -59,5 +58,18 @@ public class Menu_UI : MonoBehaviour
     public void StartNewGame()
     {
         SceneManager.LoadScene("Level_1");
+    }
+
+    /// <summary>
+    /// Открывает сцену информации поверх текущей сцены.
+    /// </summary>
+    public void OpenInfopanel()
+    {
+        SceneManager.LoadScene("Info_Panel", LoadSceneMode.Additive);
+    }
+
+    public void CloseInfo()
+    {
+        SceneManager.UnloadSceneAsync("Info_Panel");
     }
 }
