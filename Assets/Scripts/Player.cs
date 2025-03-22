@@ -173,6 +173,11 @@ public class Player : MonoBehaviour
             // Загружаем следующую сцену по имени
             SceneManager.LoadScene(nextSceneName);
         }
+        // TODO: Внести изменения при расширении проекта
+        if (CompareTag("Player") && other.CompareTag("Finish") && SceneManager.GetActiveScene().name == "Level_10")
+        {
+             SceneManager.LoadScene("Win_Panel", LoadSceneMode.Additive);
+        } 
     }
 
     /// <summary>
