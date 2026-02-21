@@ -4,30 +4,33 @@ using System.Collections.Generic;
 public class LevelGenerator : MonoBehaviour
 {
     [Header("Префабы")]
-    public GameObject floorPrefab;
-    public GameObject wallPrefab;
-    public GameObject stonePrefab;
+    public GameObject floorPrefab;          // плитка пола (куб с высотой 0.1)
+    public GameObject wallPrefab;           // стена (куб 1x1x1)
+    public GameObject stonePrefab;          // камень (куб 1x1x1)
     public GameObject playerPrefab;
     public GameObject slimePrefab;
     public GameObject skeletonPrefab;
-    public GameObject finishPrefab;
-    public GameObject pointerPrefab;
+    public GameObject finishPrefab;         // невидимый триггер
+    public GameObject pointerPrefab;        // указатель
 
     [Header("Параметры арены")]
-    public int gridRadius = 5;          // Радиус ромба (количество клеток от центра)
-    public float cellSize = 2f;          // Расстояние между центрами ячеек
+    public int gridRadius = 10;              // радиус ромба в клетках
+    public float cellSize = 1f;              // размер клетки
 
     [Header("Настройки врагов")]
-    public int slimeCountEarly = 2;      // для уровней 1-10
-    public int slimeCountLate = 2;       // для уровней 11-20
+    public int slimeCountEarly = 2;
+    public int slimeCountLate = 2;
     public int skeletonCountLate = 2;
     public int levelThreshold = 10;
+
+    [Header("Плотность камней (0-1)")]
+    [Range(0f, 1f)]
+    public float stoneDensity = 0.4f;
 
     private System.Random random;
     private Transform levelParent;
     private Vector3 centerPosition = Vector3.zero;
 
-    // Сетка препятствий: true - камень, false - пусто
     private bool[,] stones;
     private Vector2Int playerPos;
     private Vector2Int exitPos;
@@ -36,45 +39,41 @@ public class LevelGenerator : MonoBehaviour
     {
         random = new System.Random(seed);
 
-        // Очистка предыдущего уровня
         if (levelParent != null)
             Destroy(levelParent.gameObject);
         levelParent = new GameObject("Level").transform;
 
-        // Пол
-        CreateFloor();
-
-        // Выбор позиций игрока и выхода
-        ChoosePlayerAndExit();
-
-        // Инициализация сетки камней (все пусто)
-        int size = 2 * gridRadius + 1;
-        stones = new bool[size, size];
-
-        // Генерация камней с проверкой проходимости
-        GenerateStones();
-
-        // Размещение стен по периметру (кроме клетки выхода)
+        CreateFloor();                // плиточный пол
+        ChoosePlayerAndExit();        // выбор позиций игрока и выхода
+        GenerateStones();             // новая генерация камней
+        //CreateSolidPerimeter();       // сплошные стены по периметру
         CreatePerimeterWalls();
-        //CreateSolidPerimeter();
-
-        // Размещение камней
-        PlaceStones();
-
-        // Игрок
+        PlaceStones();                // расстановка камней
         PlacePlayer();
-
-        // Выход
         PlaceExit();
-
-        // Враги
         PlaceEnemies(currentLevel);
-
-        // Указатель на выход
-        PlacePointer();
+        PlacePointerOutside();        // указатель за ареной
     }
 
-    private bool IsInArena(int x, int z) => Mathf.Abs(x) + Mathf.Abs(z) <= gridRadius;
+    public bool IsInArena(int x, int z)
+    {
+        return Mathf.Abs(x) + Mathf.Abs(z) <= gridRadius;
+    }
+
+    public bool IsObstacleAt(int x, int z)
+    {
+        // Вне арены считаем препятствием
+        if (!IsInArena(x, z)) return true;
+
+        // Клетки периметра непроходимы, кроме выхода
+        if (Mathf.Abs(x) + Mathf.Abs(z) == gridRadius)
+        {
+            return !(x == exitPos.x && z == exitPos.y);
+        }
+
+        // Внутренние клетки: проверяем камень
+        return stones[x + gridRadius, z + gridRadius];
+    }
 
     private Vector3 GridToWorld(int x, int z, float yOffset = 0.5f)
     {
@@ -83,11 +82,16 @@ public class LevelGenerator : MonoBehaviour
 
     private void CreateFloor()
     {
-        float diameter = gridRadius * cellSize * 2;
-        // Предполагаем, что Plane по умолчанию 10x10
-        float scale = diameter / 10f;
-        GameObject floor = Instantiate(floorPrefab, centerPosition, Quaternion.identity, levelParent);
-        floor.transform.localScale = new Vector3(scale, 1, scale);
+        for (int x = -gridRadius; x <= gridRadius; x++)
+        {
+            for (int z = -gridRadius; z <= gridRadius; z++)
+            {
+                if (!IsInArena(x, z)) continue;
+                Vector3 pos = GridToWorld(x, z, -0.05f); // чуть ниже, чтобы объекты стояли сверху
+                GameObject tile = Instantiate(floorPrefab, pos, Quaternion.identity, levelParent);
+                tile.transform.localScale = new Vector3(cellSize, 0.1f, cellSize);
+            }
+        }
     }
 
     private void ChoosePlayerAndExit()
@@ -107,16 +111,12 @@ public class LevelGenerator : MonoBehaviour
             }
         }
 
-        // Игрок — случайная внутренняя клетка
         playerPos = innerCells[random.Next(innerCells.Count)];
-
-        // Выход — случайная граничная клетка (может совпасть с игроком? но игрок внутри, так что ок)
         exitPos = borderCells[random.Next(borderCells.Count)];
     }
 
     private void GenerateStones()
     {
-        // Список кандидатов (все внутренние клетки, кроме игрока и выхода)
         List<Vector2Int> candidates = new List<Vector2Int>();
         for (int x = -gridRadius; x <= gridRadius; x++)
         {
@@ -130,24 +130,32 @@ public class LevelGenerator : MonoBehaviour
             }
         }
 
-        Shuffle(candidates);
+        int stoneCount = Mathf.FloorToInt(candidates.Count * stoneDensity);
+        stoneCount = Mathf.Clamp(stoneCount, 0, candidates.Count);
 
-        foreach (var cell in candidates)
+        int maxAttempts = 100;
+        for (int attempt = 0; attempt < maxAttempts; attempt++)
         {
-            int ix = cell.x + gridRadius;
-            int iz = cell.y + gridRadius;
-            stones[ix, iz] = true; // временно ставим камень
-
-            if (!IsPathExists())
+            stones = new bool[2 * gridRadius + 1, 2 * gridRadius + 1];
+            Shuffle(candidates);
+            for (int i = 0; i < stoneCount; i++)
             {
-                stones[ix, iz] = false; // убираем, если заблокировало путь
+                Vector2Int cell = candidates[i];
+                stones[cell.x + gridRadius, cell.y + gridRadius] = true;
+            }
+            if (IsPathExists())
+            {
+                Debug.Log($"Уровень сгенерирован за {attempt + 1} попыток");
+                return;
             }
         }
+
+        Debug.LogWarning("Не удалось создать проходимый лабиринт, камни не ставятся");
+        stones = new bool[2 * gridRadius + 1, 2 * gridRadius + 1];
     }
 
     private bool IsPathExists()
     {
-        // BFS от playerPos до exitPos
         Queue<Vector2Int> queue = new Queue<Vector2Int>();
         HashSet<Vector2Int> visited = new HashSet<Vector2Int>();
         queue.Enqueue(playerPos);
@@ -168,10 +176,8 @@ public class LevelGenerator : MonoBehaviour
                 Vector2Int next = new Vector2Int(nx, nz);
 
                 if (!IsInArena(nx, nz)) continue;
-                // Граничные клетки проходимы только если это выход
-                if (Mathf.Abs(nx) + Mathf.Abs(nz) == gridRadius && next != exitPos) continue;
-                // Проверка камня
-                if (stones[nx + gridRadius, nz + gridRadius]) continue;
+                if (Mathf.Abs(nx) + Mathf.Abs(nz) == gridRadius && next != exitPos) continue; // граница непроходима, кроме выхода
+                if (stones[nx + gridRadius, nz + gridRadius]) continue; // камень
 
                 if (!visited.Contains(next))
                 {
@@ -196,6 +202,45 @@ public class LevelGenerator : MonoBehaviour
         }
     }
 
+    // private void CreateSolidPerimeter()
+    // {
+    //     HashSet<(int, int, int, int)> edges = new HashSet<(int, int, int, int)>();
+
+    //     for (int x = -gridRadius; x <= gridRadius; x++)
+    //     {
+    //         for (int z = -gridRadius; z <= gridRadius; z++)
+    //         {
+    //             if (!IsInArena(x, z) || Mathf.Abs(x) + Mathf.Abs(z) != gridRadius)
+    //                 continue;
+    //             if (x == exitPos.x && z == exitPos.y) continue;
+
+    //             int[] dx = { 1, -1, 0, 0 };
+    //             int[] dz = { 0, 0, 1, -1 };
+    //             for (int i = 0; i < 4; i++)
+    //             {
+    //                 int nx = x + dx[i];
+    //                 int nz = z + dz[i];
+    //                 if (!IsInArena(nx, nz)) continue;
+
+    //                 int ax = Mathf.Min(x, nx);
+    //                 int az = Mathf.Min(z, nz);
+    //                 int bx = Mathf.Max(x, nx);
+    //                 int bz = Mathf.Max(z, nz);
+    //                 var edge = (ax, az, bx, bz);
+    //                 if (edges.Contains(edge)) continue;
+    //                 edges.Add(edge);
+
+    //                 if (Mathf.Abs(nx) + Mathf.Abs(nz) == gridRadius)
+    //                     continue; // внутреннее ребро
+
+    //                 Vector3 pos = new Vector3((x + nx) * 0.5f * cellSize, 0.5f, (z + nz) * 0.5f * cellSize);
+    //                 Quaternion rot = (dx[i] != 0) ? Quaternion.Euler(0, 90, 0) : Quaternion.identity;
+    //                 Instantiate(wallPrefab, pos, rot, levelParent);
+    //             }
+    //         }
+    //     }
+    // }
+
     private void CreatePerimeterWalls()
     {
         for (int x = -gridRadius; x <= gridRadius; x++)
@@ -218,6 +263,8 @@ public class LevelGenerator : MonoBehaviour
         {
             for (int z = -gridRadius; z <= gridRadius; z++)
             {
+                if (!IsInArena(x, z)) continue;
+                if (Mathf.Abs(x) + Mathf.Abs(z) == gridRadius) continue;
                 if (stones[x + gridRadius, z + gridRadius])
                 {
                     Vector3 pos = GridToWorld(x, z, 0.5f);
@@ -230,25 +277,29 @@ public class LevelGenerator : MonoBehaviour
     private void PlacePlayer()
     {
         Vector3 pos = GridToWorld(playerPos.x, playerPos.y, 0.5f);
-        Instantiate(playerPrefab, pos, Quaternion.identity, levelParent);
+        GameObject player = Instantiate(playerPrefab, pos, Quaternion.identity, levelParent);
+        GridEntity entity = player.GetComponent<GridEntity>();
+        if (entity != null)
+        {
+            entity.SetGridPosition(playerPos.x, playerPos.y);
+            MovementManager.Instance.RegisterEntity(entity);
+        }
     }
-
     private void PlaceExit()
     {
-        Vector3 pos = GridToWorld(exitPos.x, exitPos.y);
+        Vector3 pos = GridToWorld(exitPos.x, exitPos.y, 0f); // невидимый триггер можно на полу
         Instantiate(finishPrefab, pos, Quaternion.identity, levelParent);
     }
 
     private void PlaceEnemies(int currentLevel)
     {
-        // Собираем все пустые клетки (не стена, не игрок, не выход)
         List<Vector2Int> empty = new List<Vector2Int>();
         for (int x = -gridRadius; x <= gridRadius; x++)
         {
             for (int z = -gridRadius; z <= gridRadius; z++)
             {
                 if (!IsInArena(x, z)) continue;
-                if (Mathf.Abs(x) + Mathf.Abs(z) == gridRadius) continue; // граница не используется
+                if (Mathf.Abs(x) + Mathf.Abs(z) == gridRadius) continue;
                 if (x == playerPos.x && z == playerPos.y) continue;
                 if (x == exitPos.x && z == exitPos.y) continue;
                 if (!stones[x + gridRadius, z + gridRadius])
@@ -262,73 +313,40 @@ public class LevelGenerator : MonoBehaviour
         int skeletonCount = (currentLevel <= levelThreshold) ? 0 : skeletonCountLate;
 
         int index = 0;
-        for (int i = 0; i < slimeCount; i++)
+        for (int i = 0; i < slimeCount && index < empty.Count; i++, index++)
         {
             Vector3 pos = GridToWorld(empty[index].x, empty[index].y, 0.5f);
-            Instantiate(slimePrefab, pos, Quaternion.identity, levelParent);
-            index++;
-        }
-        for (int i = 0; i < skeletonCount; i++)
-        {
-            Vector3 pos = GridToWorld(empty[index].x, empty[index].y, 0.5f);
-            Instantiate(slimePrefab, pos, Quaternion.identity, levelParent);
-            index++;
-        }
-    }
-
-    private void PlacePointer()
-    {
-        // Ставим указатель в центр арены и поворачиваем в сторону выхода
-        Vector3 pos = centerPosition;
-        GameObject pointer = Instantiate(pointerPrefab, pos, Quaternion.identity, levelParent);
-        Vector3 exitWorld = GridToWorld(exitPos.x, exitPos.y);
-        Vector3 direction = (exitWorld - pos).normalized;
-        pointer.transform.rotation = Quaternion.LookRotation(direction);
-    }
-
-    private void CreateSolidPerimeter()
-    {
-        // Словарь для хранения уже обработанных рёбер (чтобы не ставить две стены на одно ребро)
-        HashSet<(int, int, int, int)> edges = new HashSet<(int, int, int, int)>();
-
-        for (int x = -gridRadius; x <= gridRadius; x++)
-        {
-            for (int z = -gridRadius; z <= gridRadius; z++)
+            GameObject slime = Instantiate(slimePrefab, pos, Quaternion.identity, levelParent);
+            GridEntity entity = slime.GetComponent<GridEntity>();
+            if (entity != null)
             {
-                if (!IsInArena(x, z) || Mathf.Abs(x) + Mathf.Abs(z) != gridRadius)
-                    continue;
-                if (x == exitPos.x && z == exitPos.y) continue;
-
-                // Проверяем четырех соседей (dx, dz) = (1,0), (-1,0), (0,1), (0,-1)
-                int[] dx = { 1, -1, 0, 0 };
-                int[] dz = { 0, 0, 1, -1 };
-                for (int i = 0; i < 4; i++)
-                {
-                    int nx = x + dx[i];
-                    int nz = z + dz[i];
-                    if (!IsInArena(nx, nz)) continue; // сосед вне арены
-
-                    // Упорядочиваем координаты ребра, чтобы избежать дублирования
-                    int ax = Mathf.Min(x, nx);
-                    int az = Mathf.Min(z, nz);
-                    int bx = Mathf.Max(x, nx);
-                    int bz = Mathf.Max(z, nz);
-                    var edge = (ax, az, bx, bz);
-                    if (edges.Contains(edge)) continue;
-                    edges.Add(edge);
-
-                    // Если сосед тоже на периметре, то ребро внутреннее, стена не нужна
-                    if (Mathf.Abs(nx) + Mathf.Abs(nz) == gridRadius)
-                        continue;
-
-                    // Ребро ведёт наружу арены – ставим стену
-                    // Позиция стены – середина ребра
-                    Vector3 pos = new Vector3((x + nx) * 0.5f * cellSize, 0.5f, (z + nz) * 0.5f * cellSize);
-                    // Поворот стены: если dx != 0, то стена вдоль Z, иначе вдоль X
-                    Quaternion rot = (dx[i] != 0) ? Quaternion.Euler(0, 90, 0) : Quaternion.identity;
-                    Instantiate(wallPrefab, pos, rot, levelParent);
-                }
+                entity.SetGridPosition(empty[index].x, empty[index].y);
+                MovementManager.Instance.RegisterEntity(entity);
             }
         }
+        for (int i = 0; i < skeletonCount && index < empty.Count; i++, index++)
+        {
+            Vector3 pos = GridToWorld(empty[index].x, empty[index].y, 0.5f);
+            GameObject skeleton = Instantiate(skeletonPrefab, pos, Quaternion.identity, levelParent);
+            GridEntity entity = skeleton.GetComponent<GridEntity>();
+            if (entity != null)
+            {
+                entity.SetGridPosition(empty[index].x, empty[index].y);
+                MovementManager.Instance.RegisterEntity(entity);
+            }
+        }
+    }
+
+    private void PlacePointerOutside()
+    {
+        Vector3 exitWorld = GridToWorld(exitPos.x, exitPos.y, 0f);
+        Vector3 dirToExit = exitWorld.normalized;
+        float distToExit = Vector3.Distance(centerPosition, exitWorld);
+        float extraOffset = 1f;
+        Vector3 pointerPos = centerPosition + dirToExit * (distToExit + extraOffset);
+        pointerPos.y = 0f;
+
+        Quaternion pointerRot = Quaternion.LookRotation(-dirToExit); // смотрит на арену
+        Instantiate(pointerPrefab, pointerPos, pointerRot, levelParent);
     }
 }

@@ -75,11 +75,27 @@ public class GameManager : MonoBehaviour
     /// </summary>
     public void RestartLevel()
     {
+        // Генерируем новый уровень (новый сид)
+        currentGameData.levelSeed = System.DateTime.Now.GetHashCode();
         GenerateLevel(currentGameData.levelSeed, currentGameData.currentLevel);
+        // Обновляем UI
+        // if (uiManager != null)
+        //     uiManager.UpdateLevelText(currentGameData.currentLevel);
     }
 
     private void GenerateLevel(int seed, int level)
     {
         levelGenerator.GenerateLevel(seed, level);
     }
+
+    // public void ResetProgress()
+    // {
+    //     SaveManager.DeleteSave();
+    //     currentGameData = new GameData();
+    //     currentGameData.levelSeed = System.DateTime.Now.GetHashCode();
+    //     GenerateLevel(currentGameData.levelSeed, currentGameData.currentLevel);
+    //     // Обновляем UI
+    //     if (uiManager != null)
+    //         uiManager.UpdateLevelText(currentGameData.currentLevel);
+    // }
 }

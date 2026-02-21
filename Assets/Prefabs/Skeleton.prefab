@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 2846774991471881062}
   - component: {fileID: 5942636866936662319}
   - component: {fileID: 3993389856902211129}
+  - component: {fileID: 7660377324038656078}
   m_Layer: 0
   m_Name: Skeleton
   m_TagString: Enemy
@@ -204,3 +205,17 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 114
   m_CollisionDetection: 0
+--- !u!114 &7660377324038656078
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5663257402948474347}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a78d135085e048147bc92201f41195d7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GridEntity
+  gridPosition: {x: 0, y: 0}
+  isPlayer: 0

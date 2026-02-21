@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 821018358241683000}
   - component: {fileID: 1357889805701975174}
   - component: {fileID: 7108399783595422366}
+  - component: {fileID: 7851121894196952547}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -204,3 +205,17 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 112
   m_CollisionDetection: 0
+--- !u!114 &7851121894196952547
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4884375631883119277}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a78d135085e048147bc92201f41195d7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GridEntity
+  gridPosition: {x: 0, y: 0}
+  isPlayer: 1
