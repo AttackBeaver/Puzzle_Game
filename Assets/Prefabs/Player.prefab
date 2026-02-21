@@ -10,11 +10,9 @@ GameObject:
   m_Component:
   - component: {fileID: 803232080187764920}
   - component: {fileID: 4488233792189828988}
-  - component: {fileID: 974806099962216664}
   - component: {fileID: 821018358241683000}
   - component: {fileID: 1357889805701975174}
   - component: {fileID: 7108399783595422366}
-  - component: {fileID: 8390681803064628531}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -39,6 +37,7 @@ Transform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!212 &4488233792189828988
 SpriteRenderer:
+  serializedVersion: 2
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -57,6 +56,8 @@ SpriteRenderer:
   m_RayTracingAccelStructBuildFlagsOverride: 0
   m_RayTracingAccelStructBuildFlags: 1
   m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -78,9 +79,11 @@ SpriteRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_Sprite: {fileID: 1357608950, guid: 77973d953ad4ca7419a6b46cbea9ddab, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -90,27 +93,7 @@ SpriteRenderer:
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
-  m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!114 &974806099962216664
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4884375631883119277}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7b0fbc18c395b724dbf28e9ab6acae26, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  keyOne: 119
-  keyTwo: 115
-  moveDirection: {x: 0, y: 0, z: 0.5}
-  swipeThreshold: 20
-  moveSpeed: 10
-  collisionDistance: 0.5
-  maxMoveDuration: 1
 --- !u!114 &821018358241683000
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -201,10 +184,10 @@ Rigidbody:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4884375631883119277}
-  serializedVersion: 4
+  serializedVersion: 5
   m_Mass: 100
-  m_Drag: 0
-  m_AngularDrag: 0.05
+  m_LinearDamping: 0
+  m_AngularDamping: 0.05
   m_CenterOfMass: {x: 0, y: 0, z: 0}
   m_InertiaTensor: {x: 1, y: 1, z: 1}
   m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
@@ -221,19 +204,3 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 112
   m_CollisionDetection: 0
---- !u!114 &8390681803064628531
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4884375631883119277}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1aaec00781ea3e24086e3eedacc9ad56, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  deathSprites: []
-  deathSound: {fileID: 8300000, guid: d7d43178cfa78df4196c53c0d0fdcb32, type: 3}
-  frameDuration: 0.5
-  deathAnimationTrigger: Death
