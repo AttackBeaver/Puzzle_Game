@@ -28,7 +28,7 @@ public class AudioManager : MonoBehaviour
 
         musicSource = gameObject.AddComponent<AudioSource>();
         musicSource.volume = musicVolume;
-        musicSource.loop = false; // ручное управление циклом
+        musicSource.loop = false; // Цикл
         musicSource.playOnAwake = false;
 
         if (musicTracks.Length > 0)

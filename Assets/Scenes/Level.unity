@@ -1231,12 +1231,27 @@ MonoBehaviour:
   gridSizeX: 15
   gridSizeZ: 15
   cellSize: 1
+  difficultyLevels:
+  - fromLevel: 1
+    toLevel: 5
+    stoneDensity: 0.15
+    slimeCount: 2
+    skeletonCount: 0
+  - fromLevel: 6
+    toLevel: 10
+    stoneDensity: 0.2
+    slimeCount: 2
+    skeletonCount: 0
+  - fromLevel: 11
+    toLevel: 20
+    stoneDensity: 0.3
+    slimeCount: 2
+    skeletonCount: 2
+  stoneDensity: 0.15
   slimeCountEarly: 2
   slimeCountLate: 2
   skeletonCountLate: 1
   levelThreshold: 0
-  stoneDensity: 0.15
-  pointerRotationOffset: {x: 0, y: 0, z: 0}
 --- !u!1 &1606986826
 GameObject:
   m_ObjectHideFlags: 0

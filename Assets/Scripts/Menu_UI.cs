@@ -7,10 +7,8 @@ public class Menu_UI : MonoBehaviour
 
     private void Start()
     {
-        // Если GameManager ещё не создан (например, при первом запуске), создаём его
         if (GameManager.Instance == null)
         {
-            // Здесь можно загрузить префаб GameManager, но проще убедиться, что он есть в сцене
             Debug.LogError("GameManager not found! Please add it to the scene.");
         }
     }
@@ -24,7 +22,7 @@ public class Menu_UI : MonoBehaviour
         }
         else
         {
-            Debug.Log("Ошибка Новой игры");
+            Debug.LogError("Error: Start New Game");
         }
     }
 
@@ -32,13 +30,11 @@ public class Menu_UI : MonoBehaviour
     {
         if (GameManager.Instance != null)
         {
-            // Проверяем, есть ли сохранённый прогресс (если уровень > 1, но можно просто загрузить)
-            // GameManager сам загрузит данные из файла при старте
             SceneManager.LoadScene("Level");
         }
         else
         {
-            Debug.Log("Ошибка Продолжить");
+            Debug.LogError("Error: Continue Game");
         }
     }
 
@@ -59,14 +55,12 @@ public class Menu_UI : MonoBehaviour
 
     public void ToggleSound()
     {
-        // Используем AudioManager, если он есть
         if (AudioManager.Instance != null)
         {
             AudioManager.Instance.ToggleMute();
         }
         else
         {
-            // Запасной вариант
             if (isSoundOn)
             {
                 AudioListener.volume = 0f;

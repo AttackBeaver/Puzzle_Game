@@ -17,6 +17,7 @@ public class UIManager : MonoBehaviour
             levelText.text = "LVL " + level;
     }
 
+    [System.Obsolete]
     public void OnRestartButton()
     {
         GameManager.Instance.RestartLevel();

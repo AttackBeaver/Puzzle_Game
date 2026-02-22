@@ -1,9 +1,19 @@
 using UnityEngine;
 using System.Collections.Generic;
 
+[System.Serializable]
+public class LevelDifficulty
+{
+    public int fromLevel;               // начальный уровень (включительно)
+    public int toLevel;                 // конечный уровень (включительно)
+    [Range(0f, 1f)] public float stoneDensity;
+    public int slimeCount;
+    public int skeletonCount;
+}
+
 public class LevelGenerator : MonoBehaviour
 {
-    [Header("Префабы")]
+    [Header("Prefabs")]
     public GameObject floorPrefab;
     public GameObject wallPrefab;
     public GameObject stonePrefab;
@@ -11,27 +21,24 @@ public class LevelGenerator : MonoBehaviour
     public GameObject slimePrefab;
     public GameObject skeletonPrefab;
     public GameObject finishPrefab;
-    //public GameObject pointerPrefab;
 
-    [Header("Размеры арены (нечетные числа)")]
+    [Header("The size of the arena")]
     public int gridSizeX = 11;
     public int gridSizeZ = 11;
 
-    [Header("Параметры клетки")]
+    [Header("Cell Parameters")]
     public float cellSize = 1f;
 
-    [Header("Настройки врагов")]
+    [Header("Difficulty Progression")]
+    public LevelDifficulty[] difficultyLevels;
+
+    // Старые поля (используются, если difficultyLevels пуст)
+    [Header("Fallback Settings (if no difficulty levels)")]
+    public float stoneDensity = 0.4f;
     public int slimeCountEarly = 2;
     public int slimeCountLate = 2;
     public int skeletonCountLate = 2;
     public int levelThreshold = 10;
-
-    [Header("Плотность камней")]
-    [Range(0f, 1f)]
-    public float stoneDensity = 0.4f;
-
-    [Header("Указатель")]
-    public Vector3 pointerRotationOffset = Vector3.zero;
 
     private System.Random random;
     private Transform levelParent;
@@ -54,17 +61,49 @@ public class LevelGenerator : MonoBehaviour
             Destroy(levelParent.gameObject);
         levelParent = new GameObject("Level").transform;
 
+        float targetDensity = stoneDensity; // по умолчанию
+        int slimeCount = slimeCountEarly;
+        int skeletonCount = 0;
+
+        if (difficultyLevels != null && difficultyLevels.Length > 0)
+        {
+            foreach (var d in difficultyLevels)
+            {
+                if (currentLevel >= d.fromLevel && currentLevel <= d.toLevel)
+                {
+                    targetDensity = d.stoneDensity;
+                    slimeCount = d.slimeCount;
+                    skeletonCount = d.skeletonCount;
+                    break;
+                }
+            }
+        }
+        else
+        {
+            // Старая логика
+            if (currentLevel <= levelThreshold)
+            {
+                slimeCount = slimeCountEarly;
+                skeletonCount = 0;
+            }
+            else
+            {
+                slimeCount = slimeCountLate;
+                skeletonCount = skeletonCountLate;
+            }
+            targetDensity = stoneDensity;
+        }
+
         stones = new bool[gridSizeX, gridSizeZ];
 
         CreateFloor();
         ChoosePlayerAndExit();
-        GenerateStones();
-        CreatePerimeterWalls();   // стены по границам
+        GenerateStones(targetDensity);               // плотность
+        CreatePerimeterWalls();
         PlaceStones();
         PlacePlayer();
         PlaceExit();
-        PlaceEnemies(currentLevel);
-        //PlacePointerOutside();
+        PlaceEnemies(slimeCount, skeletonCount);     // количество
     }
 
     public bool IsInArena(int x, int z)
@@ -117,7 +156,7 @@ public class LevelGenerator : MonoBehaviour
         exitPos = borderCells[random.Next(borderCells.Count)];
     }
 
-    private void GenerateStones()
+    private void GenerateStones(float density)
     {
         List<Vector2Int> candidates = new List<Vector2Int>();
         for (int x = -halfX; x <= halfX; x++)
@@ -132,7 +171,7 @@ public class LevelGenerator : MonoBehaviour
             }
         }
 
-        int stoneCount = Mathf.FloorToInt(candidates.Count * stoneDensity);
+        int stoneCount = Mathf.FloorToInt(candidates.Count * density);
         stoneCount = Mathf.Clamp(stoneCount, 0, candidates.Count);
 
         int maxAttempts = 100;
@@ -147,12 +186,12 @@ public class LevelGenerator : MonoBehaviour
             }
             if (IsPathExists())
             {
-                Debug.Log($"Уровень сгенерирован за {attempt + 1} попыток");
+                Debug.Log($"Generated for {attempt + 1} step(s)");
                 return;
             }
         }
 
-        Debug.LogWarning("Не удалось создать проходимый лабиринт, камни не ставятся");
+        Debug.LogWarning("Failed to create a passable maze, and the stones are not placed");
         stones = new bool[gridSizeX, gridSizeZ];
     }
 
@@ -266,7 +305,7 @@ public class LevelGenerator : MonoBehaviour
         Instantiate(finishPrefab, pos, Quaternion.identity, levelParent);
     }
 
-    private void PlaceEnemies(int currentLevel)
+    private void PlaceEnemies(int slimeCount, int skeletonCount)
     {
         List<Vector2Int> empty = new List<Vector2Int>();
         for (int x = -halfX; x <= halfX; x++)
@@ -283,9 +322,6 @@ public class LevelGenerator : MonoBehaviour
         }
 
         Shuffle(empty);
-
-        int slimeCount = (currentLevel <= levelThreshold) ? slimeCountEarly : slimeCountLate;
-        int skeletonCount = (currentLevel <= levelThreshold) ? 0 : skeletonCountLate;
 
         int index = 0;
         for (int i = 0; i < slimeCount && index < empty.Count; i++, index++)
@@ -311,20 +347,6 @@ public class LevelGenerator : MonoBehaviour
             }
         }
     }
-
-    // private void PlacePointerOutside()
-    // {
-    //     Vector3 exitWorld = GridToWorld(exitPos.x, exitPos.y, 0f);
-    //     Vector3 dirToExit = exitWorld.normalized;
-    //     float distToExit = Vector3.Distance(centerPosition, exitWorld);
-    //     float extraOffset = 2f;
-    //     Vector3 pointerPos = centerPosition + dirToExit * (distToExit + extraOffset);
-    //     pointerPos.y = 3f;
-
-    //     Quaternion baseRot = Quaternion.LookRotation(-dirToExit);
-    //     Quaternion finalRot = baseRot * Quaternion.Euler(pointerRotationOffset);
-    //     Instantiate(pointerPrefab, pointerPos, finalRot, levelParent);
-    // }
 
     public bool IsObstacleAt(int x, int z)
     {

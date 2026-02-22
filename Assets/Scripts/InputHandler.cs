@@ -78,11 +78,11 @@ public class InputHandler : MonoBehaviour
 
                             if (angle > -45 && angle <= 45)         // вверх
                                 dz = 1;
-                            else if (angle > 45 && angle <= 135)    // вправо
+                            else if (angle > -135 && angle <= -45) // вправо
                                 dx = 1;
                             else if (angle > 135 || angle <= -135)  // вниз
                                 dz = -1;
-                            else if (angle > -135 && angle <= -45)  // влево
+                            else if (angle > 45 && angle <= 135)  // влево
                                 dx = -1;
 
                             MovementManager.Instance?.AttemptMove(dx, dz);
