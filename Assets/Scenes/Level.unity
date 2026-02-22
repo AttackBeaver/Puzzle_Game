@@ -1234,19 +1234,34 @@ MonoBehaviour:
   difficultyLevels:
   - fromLevel: 1
     toLevel: 5
-    stoneDensity: 0.15
+    stoneDensity: 0.1
     slimeCount: 2
     skeletonCount: 0
   - fromLevel: 6
     toLevel: 10
-    stoneDensity: 0.2
-    slimeCount: 2
+    stoneDensity: 0.15
+    slimeCount: 3
     skeletonCount: 0
   - fromLevel: 11
     toLevel: 20
-    stoneDensity: 0.3
+    stoneDensity: 0.2
     slimeCount: 2
     skeletonCount: 2
+  - fromLevel: 21
+    toLevel: 30
+    stoneDensity: 0.25
+    slimeCount: 3
+    skeletonCount: 3
+  - fromLevel: 31
+    toLevel: 50
+    stoneDensity: 0.3
+    slimeCount: 4
+    skeletonCount: 4
+  - fromLevel: 51
+    toLevel: 100
+    stoneDensity: 0.5
+    slimeCount: 5
+    skeletonCount: 5
   stoneDensity: 0.15
   slimeCountEarly: 2
   slimeCountLate: 2
