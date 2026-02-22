@@ -21,7 +21,7 @@ public class MovementManager : MonoBehaviour
         if (levelGenerator == null)
             Debug.LogError("MovementManager: LevelGenerator not found!");
 
-        // Подстраховка: добавляем всех существ, которые уже есть в сцене (например, при первом запуске)
+        // Подхватываем уже существующих существ (на случай, если генерация произошла раньше)
         var existing = FindObjectsOfType<GridEntity>();
         foreach (var e in existing)
         {
@@ -38,10 +38,17 @@ public class MovementManager : MonoBehaviour
 
     public void UnregisterEntity(GridEntity entity)
     {
-        if (allEntities.Contains(entity))
-            allEntities.Remove(entity);
+        allEntities.Remove(entity);
     }
 
+    [System.Obsolete]
+    public void RefreshEntities()
+    {
+        allEntities.Clear();
+        allEntities.AddRange(FindObjectsOfType<GridEntity>());
+    }
+
+    [System.Obsolete]
     public bool AttemptMove(int dx, int dz)
     {
         if (dx == 0 && dz == 0) return false;
@@ -49,7 +56,7 @@ public class MovementManager : MonoBehaviour
         // Словарь: существо → новая позиция (для тех, кто может двигаться)
         Dictionary<GridEntity, Vector2Int> moves = new Dictionary<GridEntity, Vector2Int>();
 
-        // Шаг 1: проверяем возможность движения для каждого
+        // Шаг 1: определяем, кто может двигаться (проверяем только стены и границы)
         foreach (var entity in allEntities)
         {
             Vector2Int newPos = entity.gridPosition + new Vector2Int(dx, dz);
@@ -62,25 +69,11 @@ public class MovementManager : MonoBehaviour
             if (levelGenerator.IsObstacleAt(newPos.x, newPos.y))
                 continue;
 
-            // Проверка занятости клетки другими существами (текущие позиции)
-            bool occupied = false;
-            foreach (var other in allEntities)
-            {
-                if (other == entity) continue;
-                if (other.gridPosition == newPos)
-                {
-                    occupied = true;
-                    break;
-                }
-            }
-            if (occupied) continue;
-
-            // Все проверки пройдены
+            // Клетка свободна от препятствий – добавляем в кандидаты
             moves[entity] = newPos;
         }
 
         // Шаг 2: исключаем конфликты (два существа хотят в одну клетку)
-        // Считаем, сколько существ хотят в каждую клетку
         Dictionary<Vector2Int, int> cellCount = new Dictionary<Vector2Int, int>();
         foreach (var pos in moves.Values)
         {
@@ -90,32 +83,59 @@ public class MovementManager : MonoBehaviour
                 cellCount[pos] = 1;
         }
 
-        // Клетки, в которые хотят больше одного
         HashSet<Vector2Int> conflictCells = new HashSet<Vector2Int>();
         foreach (var kvp in cellCount)
-        {
-            if (kvp.Value > 1)
-                conflictCells.Add(kvp.Key);
-        }
+            if (kvp.Value > 1) conflictCells.Add(kvp.Key);
 
         // Удаляем всех, кто целится в конфликтные клетки
         List<GridEntity> toRemove = new List<GridEntity>();
         foreach (var kvp in moves)
-        {
             if (conflictCells.Contains(kvp.Value))
                 toRemove.Add(kvp.Key);
-        }
         foreach (var rem in toRemove)
-        {
             moves.Remove(rem);
-        }
 
-        // Шаг 3: выполняем перемещение
+        // Шаг 3: проверка на смерть игрока
+        GridEntity player = null;
+        Vector2Int? playerNewPos = null;
         foreach (var kvp in moves)
         {
-            kvp.Key.MoveTo(kvp.Value, levelGenerator.cellSize);
+            if (kvp.Key.isPlayer)
+            {
+                player = kvp.Key;
+                playerNewPos = kvp.Value;
+                break;
+            }
         }
 
+        if (playerNewPos.HasValue)
+        {
+            // Проверяем, не совпадает ли новая позиция игрока с позицией любого другого существа
+            foreach (var entity in allEntities)
+            {
+                if (entity == player) continue;
+                Vector2Int otherPos = moves.ContainsKey(entity) ? moves[entity] : entity.gridPosition;
+                if (otherPos == playerNewPos.Value)
+                {
+                    // Смерть!
+                    PlayerDied();
+                    return true; // движение отменяется
+                }
+            }
+        }
+
+        // Шаг 4: выполняем перемещение
+        foreach (var kvp in moves)
+            kvp.Key.MoveTo(kvp.Value, levelGenerator.cellSize);
+
         return moves.Count > 0;
+    }
+
+    [System.Obsolete]
+    private void PlayerDied()
+    {
+        Debug.Log("Player died! Restarting level...");
+        if (GameManager.Instance != null)
+            GameManager.Instance.PlayerDied();
     }
 }

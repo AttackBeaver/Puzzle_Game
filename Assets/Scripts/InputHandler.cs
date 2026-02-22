@@ -3,19 +3,16 @@ using UnityEngine;
 public class InputHandler : MonoBehaviour
 {
     [Header("Swipe Settings")]
-    [SerializeField] private float swipeThreshold = 50f;     // минимальное расстояние свайпа в пикселях
-    [SerializeField] private float maxSwipeTime = 0.5f;      // максимальное время свайпа
-
-    [Header("Debug (PC)")]
-    [SerializeField] private bool useDiagonalMapping = true; // для изометрии: вверх/вниз -> диагонали
+    [SerializeField] private float swipeThreshold = 50f;
+    [SerializeField] private float maxSwipeTime = 0.5f;
 
     private Vector2 touchStartPos;
     private float touchStartTime;
     private bool isSwiping = false;
 
+    [System.Obsolete]
     private void Update()
     {
-        // ПК-управление (клавиши)
         if (Application.isEditor ||
             Application.platform == RuntimePlatform.WindowsPlayer ||
             Application.platform == RuntimePlatform.OSXPlayer ||
@@ -23,17 +20,17 @@ public class InputHandler : MonoBehaviour
         {
             HandleKeyboardInput();
         }
-        else // Мобильные устройства
+        else
         {
             HandleTouchInput();
         }
     }
 
+    [System.Obsolete]
     private void HandleKeyboardInput()
     {
         int dx = 0, dz = 0;
 
-        // WASD или стрелки
         if (Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.UpArrow))
             dz = 1;
         else if (Input.GetKeyDown(KeyCode.S) || Input.GetKeyDown(KeyCode.DownArrow))
@@ -45,25 +42,11 @@ public class InputHandler : MonoBehaviour
 
         if (dx != 0 || dz != 0)
         {
-            if (useDiagonalMapping)
-            {
-                // Преобразуем ортогональные направления в диагональные для изометрии
-                // Здесь мы используем простое правило: W = (-1,1), S = (1,-1), A = (-1,-1), D = (1,1)
-                // Это нужно настроить под твою камеру
-                if (dx == 0 && dz == 1)      // W -> вверх по экрану
-                    (dx, dz) = (-1, 1);
-                else if (dx == 0 && dz == -1) // S -> вниз
-                    (dx, dz) = (1, -1);
-                else if (dx == -1 && dz == 0) // A -> влево
-                    (dx, dz) = (-1, -1);
-                else if (dx == 1 && dz == 0)  // D -> вправо
-                    (dx, dz) = (1, 1);
-            }
-
             MovementManager.Instance?.AttemptMove(dx, dz);
         }
     }
 
+    [System.Obsolete]
     private void HandleTouchInput()
     {
         if (Input.touchCount == 0) return;
@@ -89,18 +72,18 @@ public class InputHandler : MonoBehaviour
                         if (swipeDelta.magnitude >= swipeThreshold)
                         {
                             Vector2 direction = swipeDelta.normalized;
-                            float angle = Vector2.SignedAngle(Vector2.up, direction); // угол от вертикали вверх
+                            float angle = Vector2.SignedAngle(Vector2.up, direction);
 
                             int dx = 0, dz = 0;
 
-                            if (angle > -45 && angle <= 45)         // вверх экрана -> влево
-                                (dx, dz) = (-1, -1);
-                            else if (angle > 45 && angle <= 135)    // вправо экрана -> вниз
-                                (dx, dz) = (1, -1);
-                            else if (angle > 135 || angle <= -135)  // вниз экрана -> вправо
-                                (dx, dz) = (1, 1);
-                            else if (angle > -135 && angle <= -45)  // влево экрана -> вверх
-                                (dx, dz) = (-1, 1);
+                            if (angle > -45 && angle <= 45)         // вверх
+                                dz = 1;
+                            else if (angle > 45 && angle <= 135)    // вправо
+                                dx = 1;
+                            else if (angle > 135 || angle <= -135)  // вниз
+                                dz = -1;
+                            else if (angle > -135 && angle <= -45)  // влево
+                                dx = -1;
 
                             MovementManager.Instance?.AttemptMove(dx, dz);
                         }

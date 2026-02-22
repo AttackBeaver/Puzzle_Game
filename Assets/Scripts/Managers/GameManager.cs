@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
@@ -12,6 +13,7 @@ public class GameManager : MonoBehaviour
     [Header("Настройки")]
     public int firstLevel = 1; // Для наглядности
 
+    [System.Obsolete]
     private void Awake()
     {
         // Простая реализация синглтона
@@ -29,6 +31,7 @@ public class GameManager : MonoBehaviour
         InitializeGame();
     }
 
+    [System.Obsolete]
     private void InitializeGame()
     {
         // 1. Пытаемся загрузить сохранение
@@ -73,29 +76,56 @@ public class GameManager : MonoBehaviour
     /// <summary>
     /// Вызывать, когда игрок нажал кнопку "Перезапустить"
     /// </summary>
+    [System.Obsolete]
     public void RestartLevel()
     {
-        // Генерируем новый уровень (новый сид)
         currentGameData.levelSeed = System.DateTime.Now.GetHashCode();
         GenerateLevel(currentGameData.levelSeed, currentGameData.currentLevel);
-        // Обновляем UI
         // if (uiManager != null)
         //     uiManager.UpdateLevelText(currentGameData.currentLevel);
     }
 
+    [System.Obsolete]
     private void GenerateLevel(int seed, int level)
     {
         levelGenerator.GenerateLevel(seed, level);
+        if (MovementManager.Instance != null)
+            MovementManager.Instance.RefreshEntities();
     }
 
-    // public void ResetProgress()
-    // {
-    //     SaveManager.DeleteSave();
-    //     currentGameData = new GameData();
-    //     currentGameData.levelSeed = System.DateTime.Now.GetHashCode();
-    //     GenerateLevel(currentGameData.levelSeed, currentGameData.currentLevel);
-    //     // Обновляем UI
-    //     if (uiManager != null)
-    //         uiManager.UpdateLevelText(currentGameData.currentLevel);
-    // }
+    public void ResetProgress()
+    {
+        SaveManager.DeleteSave();                 // удаляем файл сохранения
+        currentGameData = new GameData();         // новые данные (уровень 1, сид 0)
+        currentGameData.levelSeed = System.DateTime.Now.GetHashCode(); // случайный сид
+        // Не генерируем уровень сразу, он сгенерируется при загрузке сцены "Level"
+    }
+
+    [System.Obsolete]
+    public void PlayerDied()
+    {
+        // Перезапускаем уровень с тем же сидом (игрок начинает заново этот же уровень)
+        GenerateLevel(currentGameData.levelSeed, currentGameData.currentLevel);
+    }
+
+    [System.Obsolete]
+    private void OnEnable()
+    {
+        SceneManager.sceneLoaded += OnSceneLoaded;
+    }
+
+    [System.Obsolete]
+    private void OnDisable()
+    {
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+    }
+
+    [System.Obsolete]
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        if (scene.name == "Level")
+        {
+            GenerateLevel(currentGameData.levelSeed, currentGameData.currentLevel);
+        }
+    }
 }
