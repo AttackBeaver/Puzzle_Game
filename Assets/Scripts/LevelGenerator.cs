@@ -58,7 +58,10 @@ public class LevelGenerator : MonoBehaviour
         random = new System.Random(seed);
 
         if (levelParent != null)
+        {
+            MovementManager.Instance?.ClearEntities();
             Destroy(levelParent.gameObject);
+        }
         levelParent = new GameObject("Level").transform;
 
         float targetDensity = stoneDensity; // по умолчанию

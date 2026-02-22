@@ -107,6 +107,20 @@ public class GameManager : MonoBehaviour
         if (scene.name == "Level")
         {
             GenerateLevel(currentGameData.levelSeed, currentGameData.currentLevel);
+            StartCoroutine(DelayedRefreshEntities());
         }
+    }
+
+    [System.Obsolete]
+    private System.Collections.IEnumerator DelayedRefreshEntities()
+    {
+        yield return null; // ждём один кадр
+        if (MovementManager.Instance != null)
+            MovementManager.Instance.RefreshEntities();
+    }
+
+    private void OnApplicationQuit()
+    {
+        SaveManager.SaveGame(currentGameData);
     }
 }

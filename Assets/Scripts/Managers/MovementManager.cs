@@ -10,8 +10,15 @@ public class MovementManager : MonoBehaviour
 
     private void Awake()
     {
-        if (Instance == null) Instance = this;
-        else Destroy(gameObject);
+        if (Instance == null)
+        {
+            Instance = this;
+            DontDestroyOnLoad(gameObject);
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
     }
 
     [System.Obsolete]
@@ -125,5 +132,10 @@ public class MovementManager : MonoBehaviour
         Debug.Log("Player died. Restarting level.");
         if (GameManager.Instance != null)
             GameManager.Instance.PlayerDied();
+    }
+
+    public void ClearEntities()
+    {
+        allEntities.Clear();
     }
 }
