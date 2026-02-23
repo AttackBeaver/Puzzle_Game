@@ -94,7 +94,7 @@ LightmapSettings:
     m_TrainingDataDestination: TrainingData
     m_LightProbeSampleCountMultiplier: 4
   m_LightingDataAsset: {fileID: 0}
-  m_LightingSettings: {fileID: 0}
+  m_LightingSettings: {fileID: 4890085278179872738, guid: 7d102af9d145c98448395ea23eb0d582, type: 2}
 --- !u!196 &4
 NavMeshSettings:
   serializedVersion: 2
@@ -1258,8 +1258,8 @@ MonoBehaviour:
     slimeCount: 4
     skeletonCount: 4
   - fromLevel: 51
-    toLevel: 100
-    stoneDensity: 0.5
+    toLevel: 1000
+    stoneDensity: 0.4
     slimeCount: 5
     skeletonCount: 5
   stoneDensity: 0.15
